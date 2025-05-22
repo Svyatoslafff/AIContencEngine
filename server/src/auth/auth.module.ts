@@ -18,15 +18,4 @@ import { JwtMiddleware } from 'src/middlewares/validateToken.middleware';
     controllers: [AuthController],
     providers: [AuthService],
 })
-export class AuthModule {
-    // configure(consumer: MiddlewareConsumer) {
-    //     consumer
-    //         .apply(JwtMiddleware)
-    //         .forRoutes({ path: '', method: RequestMethod.ALL });
-    // }
-    // constructor(private configService: ConfigService) {
-    //     const mongo_user = this.configService.get<string>('MONGO_USER');
-    //     const mongo_password = this.configService.get<string>('MONGO_PASSWORD');
-    //     const mongo_cluster = this.configService.get<string>('MONGO_CLUSTER');
-    // }
-}
+export class AuthModule {}

@@ -18,8 +18,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Session } from 'inspector/promises';
 import { SessionDocument } from 'src/db/session.schema';
+import { log } from 'console';
 @Controller('openai-requests')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class OpenaiRequestsController {
     constructor(
         private readonly openaiService: OpenaiService,
@@ -34,12 +35,16 @@ export class OpenaiRequestsController {
         @Body('prompt') prompt: string,
         @Req() req: Request
     ): Promise<OpenaiRequest> {
-        const [bearer, token] = req.headers.authorization;
+        const [bearer, token] = req.headers.authorization.split(' ');
         console.log(token);
-        const { userId } = await this.sessionModel
+        const data = await this.sessionModel
             .findOne({ accessToken: token })
             .exec();
 
+        log(data);
+        const { userId } = data;
+        log(userId);
+        log(prompt);
         const response = await this.openaiService.generateText(prompt);
 
         const newRequest = new this.openaiRequestModel({
@@ -50,6 +55,7 @@ export class OpenaiRequestsController {
         });
 
         return newRequest.save();
+        // return;
     }
 
     @Get('user/:userId')

@@ -16,7 +16,7 @@ export class OpenaiService {
         try {
             const completion = await this.openai.chat.completions.create({
                 messages: [{ role: 'user', content: prompt }],
-                model: 'gpt-3.5-turbo',
+                model: 'gpt-4.1',
             });
 
             return completion.choices[0].message.content;

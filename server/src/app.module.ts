@@ -26,16 +26,10 @@ import { OpenaiRequestsModule } from './openai-requests/openai-requests.module';
     controllers: [AppController],
     providers: [
         AppService,
-        {
-            provide: APP_FILTER,
-            useClass: AllExceptionsFilter,
-        },
+        // {
+        //     provide: APP_FILTER,
+        //     useClass: AllExceptionsFilter,
+        // },
     ],
 })
-export class AppModule {
-    constructor(private configService: ConfigService) {
-        const mongo_user = this.configService.get<string>('MONGO_USER');
-        const mongo_password = this.configService.get<string>('MONGO_PASSWORD');
-        const mongo_cluster = this.configService.get<string>('MONGO_CLUSTER');
-    }
-}
+export class AppModule {}
