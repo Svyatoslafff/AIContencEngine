@@ -66,7 +66,7 @@ export class AuthService {
     }
 
     async createUser(name: string, email: string, password: string) {
-        const user = this.findUser(email);
+        const user = await this.findUser(email);
         if (user)
             throw new HttpException(
                 'User with such email already exist',
