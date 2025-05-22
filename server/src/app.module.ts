@@ -12,7 +12,7 @@ import { OpenaiRequestsModule } from './openai-requests/openai-requests.module';
     imports: [
         AuthModule,
         ConfigModule.forRoot({
-            isGlobal: true, // Make the ConfigModule global
+            isGlobal: true,
         }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],

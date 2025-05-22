@@ -16,8 +16,7 @@ import {
 } from '../db/openai-request.schema';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { Session } from 'inspector/promises';
-import { SessionDocument } from 'src/db/session.schema';
+import { SessionDocument, Session } from 'src/db/session.schema';
 import { log } from 'console';
 @Controller('openai-requests')
 // @UseGuards(AuthGuard('jwt'))
@@ -46,6 +45,7 @@ export class OpenaiRequestsController {
         log(userId);
         log(prompt);
         const response = await this.openaiService.generateText(prompt);
+        log(response);
 
         const newRequest = new this.openaiRequestModel({
             userId,
