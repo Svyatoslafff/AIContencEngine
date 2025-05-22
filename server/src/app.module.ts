@@ -6,17 +6,22 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './middlewares/exceptions.filter';
+import { OpenaiRequestsModule } from './openai-requests/openai-requests.module';
 
 @Module({
     imports: [
         AuthModule,
-        ConfigModule.forRoot({ isGlobal: true }),
+ ConfigModule.forRoot({
+ isGlobal: true, // Make the ConfigModule global
+ }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (configService: ConfigService) => ({
                 uri: configService.get<string>('MONGO_LINK'),
             }),
+       }),
+       OpenaiRequestsModule,
         }),
     ],
     controllers: [AppController],

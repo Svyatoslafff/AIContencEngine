@@ -20,7 +20,15 @@ export class JwtMiddleware implements NestMiddleware {
 
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req['user'] = decoded;
+            // Assuming decoded token contains info to find session, e.g., sessionId
+            // You need to implement the logic to find the session based on decoded info
+            // For example:
+            // const session = await this.sessionService.findSessionById(decoded.sessionId);
+            // if (!session) {
+            //     throw new UnauthorizedException('Session not found');
+            // }
+            // req['userId'] = session.userId; // Attach userId to request
+            // If you still need the decoded token for other purposes: req['user'] = decoded;
             next();
         } catch (err) {
             throw new UnauthorizedException('Invalid or expired token');
