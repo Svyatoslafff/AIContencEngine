@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Document, HydratedDocument, Model, Schema } from 'mongoose';
+import { Document, HydratedDocument, Model, Schema, Types } from 'mongoose';
 import { User, UserDocument } from 'src/db/user.schema';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
@@ -19,11 +19,16 @@ export class AuthService {
     async findUser(email: string) {
         return await this.userModel.findOne({ email }).exec();
     }
-    async findSession(params: {
+    async findSession({
+        userId,
+    }: {
         accessToken?: string;
         userId?: Schema.Types.ObjectId;
     }) {
-        return await this.sessionModel.findOne(params).lean<Session>().exec();
+        log(userId);
+        const data = await this.sessionModel.findOne({ userId }).exec();
+        log(data);
+        return data;
     }
 
     async loginUser(email: string, password: string) {

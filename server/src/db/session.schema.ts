@@ -5,7 +5,7 @@ export type SessionDocument = Session & Document;
 
 @Schema({ collection: 'sessions', timestamps: true, versionKey: false })
 export class Session {
-    @Prop({ required: true })
+    @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: 'users' })
     userId: SchemaType.Types.ObjectId;
 
     @Prop({ required: true, unique: true })
@@ -13,10 +13,3 @@ export class Session {
 }
 
 export const SessionSchema = SchemaFactory.createForClass(Session);
-
-SessionSchema.set('toJSON', {
-    transform: (doc, ret) => {
-        delete ret.__v;
-        return ret;
-    },
-});

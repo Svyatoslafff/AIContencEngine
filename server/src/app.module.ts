@@ -11,18 +11,17 @@ import { OpenaiRequestsModule } from './openai-requests/openai-requests.module';
 @Module({
     imports: [
         AuthModule,
- ConfigModule.forRoot({
- isGlobal: true, // Make the ConfigModule global
- }),
+        ConfigModule.forRoot({
+            isGlobal: true, // Make the ConfigModule global
+        }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (configService: ConfigService) => ({
                 uri: configService.get<string>('MONGO_LINK'),
             }),
-       }),
-       OpenaiRequestsModule,
         }),
+        OpenaiRequestsModule,
     ],
     controllers: [AppController],
     providers: [
