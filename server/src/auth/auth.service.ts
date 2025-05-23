@@ -32,89 +32,144 @@ export class AuthService {
     }
 
     async loginUser(email: string, password: string) {
-        const user = await this.findUser(email);
-        console.log(user);
+        try {
+            const user = await this.findUser(email);
+            console.log(user);
 
-        if (!user)
-            throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+            if (!user)
+                throw new HttpException(
+                    'User not found!',
+                    HttpStatus.NOT_FOUND
+                );
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid)
-            throw new HttpException(
-                'Password is not correct',
-                HttpStatus.BAD_REQUEST
+            const isPasswordValid = await bcrypt.compare(
+                password,
+                user.password
             );
 
-        const jwtSecret = this.configService.get<string>('JWT_SECRET');
-        const accessToken = jwt.sign({ userId: user._id }, jwtSecret, {
-            expiresIn: '1h',
-        });
+            if (!isPasswordValid)
+                throw new HttpException(
+                    'Password is not correct',
+                    HttpStatus.BAD_REQUEST
+                );
 
-        const prevSession = await this.findSession({
-            userId: user._id as Schema.Types.ObjectId,
-        });
-        console.log(prevSession);
+            const jwtSecret = this.configService.get<string>('JWT_SECRET');
+            const accessToken = jwt.sign({ userId: user._id }, jwtSecret, {
+                expiresIn: '1h',
+            });
 
-        if (prevSession)
-            await this.sessionModel.deleteOne({ userId: user._id });
+            const prevSession = await this.findSession({
+                userId: user._id as Schema.Types.ObjectId,
+            });
 
-        const newSession = new this.sessionModel({
-            accessToken,
-            userId: user._id,
-        });
-        newSession.save();
+            console.log(prevSession);
 
-        return {
-            accessToken,
-        };
+            if (prevSession) {
+                const res = await this.sessionModel.deleteOne({
+                    userId: user._id,
+                });
+                log(res);
+            }
+            const newSession = new this.sessionModel({
+                accessToken,
+                userId: user._id,
+            });
+            newSession.save();
+
+            return {
+                accessToken,
+                email,
+            };
+        } catch (err) {
+            throw err;
+        }
     }
 
-    async createUser(name: string, email: string, password: string) {
-        const user = await this.findUser(email);
-        if (user)
-            throw new HttpException(
-                'User with such email already exist',
-                HttpStatus.CONFLICT
-            );
-        const newUser = new this.userModel({
-            name,
-            email,
-            password: await bcrypt.hash(password, 10),
-        });
-        return newUser.save();
+    async createUser(email: string, password: string) {
+        try {
+            const user = await this.findUser(email);
+            if (user)
+                throw new HttpException(
+                    'User with such email already exist',
+                    HttpStatus.CONFLICT
+                );
+            const newUser = new this.userModel({
+                email,
+                password: await bcrypt.hash(password, 10),
+            });
+            return newUser.save();
+        } catch (err) {
+            throw err;
+        }
     }
-    // async refreshUser(token: string) {
-    //     log(token);
-    //     const jwtSecret = this.configService.get<string>('JWT_SECRET');
-    //     const isTokenValid = jwt.verify(token, jwtSecret);
-    //     if (!isTokenValid)
-    //         throw new HttpException('token expired', HttpStatus.UNAUTHORIZED);
-    //     const session = await this.findSession({ accessToken: token });
-    //     log(session);
-    //     if (!session) {
-    //         throw new HttpException('Session not found', HttpStatus.NOT_FOUND);
-    //     }
-    //     await this.sessionModel.deleteOne({ accessToken: token });
-    //     const newSession = new this.sessionModel({
-    //         accessToken: token,
-    //         userId: session.userId,
-    //     });
-    //     newSession.save();
+    async refreshUser(payload: string) {
+        try {
+            const [bearer, token] = payload.split(' ');
+            if (bearer !== 'Bearer')
+                throw new HttpException(
+                    'Authorization token is not bearer',
+                    HttpStatus.BAD_REQUEST
+                );
+            const jwtSecret = this.configService.get<string>('JWT_SECRET');
+            log(token);
+            const isTokenValid = jwt.verify(token, jwtSecret);
+            if (!isTokenValid)
+                throw new HttpException(
+                    'Token expired',
+                    HttpStatus.UNAUTHORIZED
+                );
+            const session = await this.sessionModel.findOne({
+                accessToken: token,
+            });
+            log(session);
+            log(session.userId);
+            const user = await this.userModel.findOne({ _id: session.userId });
+            if (!session) {
+                throw new HttpException(
+                    'Session not found',
+                    HttpStatus.NOT_FOUND
+                );
+            }
+            const res = await this.sessionModel.deleteOne({
+                accessToken: token,
+            });
+            log(res);
+            const newSession = new this.sessionModel({
+                accessToken: token,
+                userId: session.userId,
+            });
+            newSession.save();
 
-    //     return { accessToken: newSession.accessToken };
-    // }
+            return { accessToken: newSession.accessToken, email: user.email };
+        } catch (err) {
+            throw err;
+        }
+    }
     async logoutUser(payload: string) {
-        const [bearer, token] = payload.split(' ');
-        if (bearer !== 'Bearer')
-            throw new HttpException(
-                'Authorization token is not bearer',
-                HttpStatus.BAD_REQUEST
-            );
-        const data = await this.findSession({ accessToken: token });
+        try {
+            const [bearer, token] = payload.split(' ');
+            if (bearer !== 'Bearer')
+                throw new HttpException(
+                    'Authorization token is not bearer',
+                    HttpStatus.BAD_REQUEST
+                );
+            log(token);
 
-        if (!data)
-            throw new HttpException('Session not found', HttpStatus.NOT_FOUND);
-        await this.sessionModel.deleteOne({ accessToken: token });
+            const data = await this.sessionModel.findOne({
+                accessToken: token,
+            });
+
+            if (!data)
+                throw new HttpException(
+                    'Session not found',
+                    HttpStatus.NOT_FOUND
+                );
+            const res = await this.sessionModel.deleteOne({
+                accessToken: token,
+            });
+            log(res);
+        } catch (err) {
+            throw err;
+        }
     }
 }

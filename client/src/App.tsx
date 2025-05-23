@@ -1,29 +1,41 @@
 import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ModalsContext } from './contexts/ModalsContext';
 import HomePage from './pages/HomePage';
+import { UserContext } from './contexts/UserContext';
+import { refreshUser } from './api/auth';
 
 function App() {
-    // const modalStates = useContext(ModalsContext);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    // const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    // const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+    const user = useContext(UserContext);
+    if (!user) return;
+
+    useEffect(() => {
+        async function refresh() {
+            if (!user) return;
+            if (user.token) {
+                try {
+                    console.log(user.token);
+                    const res = await refreshUser(user.token);
+                    console.log(res);
+
+                    localStorage.setItem(
+                        'accessToken',
+                        res.data.data.accessToken
+                    );
+                    user.setUser({ email: res.data.data.email });
+                } catch (err) {
+                    // localStorage.setItem('accessToken', '');
+                    user.setUser(null);
+                }
+            }
+        }
+        refresh();
+    }, []);
+
     return (
         <Routes>
-            <Route
-                path="/"
-                element={
-                    <Header
-                        isLoggedIn={isLoggedIn}
-                        setIsLoggedIn={setIsLoggedIn}
-                        // isLoginModalOpen={isLoginModalOpen}
-                        // isRegisterModalOpen={isRegisterModalOpen}
-                        // setIsLoginModalOpen={setIsLoginModalOpen}
-                        // setIsRegisterModalOpen={setIsRegisterModalOpen}
-                    />
-                }
-            >
+            <Route path="/" element={<Header />}>
                 <Route index element={<HomePage />} />
             </Route>
         </Routes>

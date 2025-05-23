@@ -14,9 +14,9 @@ import {
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from 'src/validation/auth.dto';
+import { IncomingHttpHeaders } from 'http';
 
 type user = {
-    name: string;
     password: string;
     email: string;
 };
@@ -34,26 +34,27 @@ export class AuthController {
         };
     }
     @Post('register')
-    async registerUser(@Body() { name, password, email }: CreateUserDto) {
-        const data = await this.authService.createUser(name, email, password);
+    async registerUser(@Body() { password, email }: CreateUserDto) {
+        const data = await this.authService.createUser(email, password);
         return {
             status: 201,
             data,
         };
     }
-    // @Post('refresh')
-    // @HttpCode(HttpStatus.OK)
-    // async refreshUser(@Body() { accessToken }: { accessToken: string }) {
-    //     const data = await this.authService.refreshUser(accessToken);
-    //     return {
-    //         status: 200,
-    //         data,
-    //     };
-    // }
+    @Post('refresh')
+    @HttpCode(HttpStatus.OK)
+    async refreshUser(@Headers() headers: IncomingHttpHeaders) {
+        const token = headers.authorization;
+        const data = await this.authService.refreshUser(token);
+        return {
+            status: 200,
+            data,
+        };
+    }
     @Post('logout')
     @HttpCode(HttpStatus.OK)
-    async logoutUser(@Req() request: Request) {
-        const token = request.headers.authorization;
+    async logoutUser(@Headers() headers: IncomingHttpHeaders) {
+        const token = headers.authorization;
         const data = await this.authService.logoutUser(token);
 
         return {

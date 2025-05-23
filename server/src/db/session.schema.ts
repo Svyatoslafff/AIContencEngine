@@ -8,7 +8,7 @@ export class Session {
     @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: 'users' })
     userId: SchemaType.Types.ObjectId;
 
-    @Prop({ required: true, unique: true })
+    @Prop({ required: true })
     accessToken: string;
 }
 
