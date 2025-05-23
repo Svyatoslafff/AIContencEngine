@@ -3,51 +3,52 @@ import AuthModal from '../components/Modals/AuthModal';
 import { Button } from '@mui/material';
 import { ModalsContext } from '../contexts/ModalsContext';
 import { UserContext } from '../contexts/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { createRequest, getRequestsByUserId } from '../api/openai'; // Assuming createRequest is defined here
+import { Link, useNavigate } from 'react-router-dom';
+import { createRequest, getRequestsByUserId } from '../api/openai';
+import toast from 'react-hot-toast';
+import type { ModifiedAxiosError } from '../types';
 
-const HomePage = () => { // Corrected component definition
+const HomePage = () => {
     const modalsData = useContext(ModalsContext);
     const user = useContext(UserContext);
-
-    const [requests, setRequests] = useState([]);
+    if (!user || !modalsData) return;
+    const [requests, setRequests] = useState([
+        { _id: 14324234234, prompt: 'fdsfsdfdsf' },
+        { _id: 14324234232234, prompt: 'dsfdsfsf' },
+        { _id: 1435234234, prompt: 'reterter' },
+        { _id: 143345234234, prompt: 'tertert' },
+    ]);
     const [newRequestText, setNewRequestText] = useState('');
     const navigate = useNavigate();
 
     const fetchRequests = async () => {
-        if (!user.user) return;
+        if (!user || !user.user) return;
         try {
-            // Assuming getRequestsByUserId is implemented to call your backend
-            const response = await getRequestsByUserId(user.user._id); // Assuming _id is the user ID
-            setRequests(response.data);
-        } catch (error) {
-            console.error('Error fetching requests:', error);
+            const response = await getRequestsByUserId(user.user._id);
+            console.log(response);
+
+            //! setRequests(response);  uncomment this to fetch requests
+        } catch (err) {
+            toast.error((err as ModifiedAxiosError).message);
         }
     };
 
-    const handleInputChange = (event) => {
+    const handleInputChange = event => {
         setNewRequestText(event.target.value);
     };
 
-    const handleFormSubmit = async (event) => {
+    const handleFormSubmit = async event => {
         event.preventDefault();
 
         if (newRequestText.trim() === '') {
             return;
         }
 
+        if (!user) return;
         try {
-            // Get the authentication token from your user context or wherever you store it
-            const token = user.user.token; // Assuming the token is stored in user.user.token
+            const token = user.token;
 
-            const response = await fetch('/openai-requests', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // Include the JWT token
-                },
-                body: JSON.stringify({ prompt: newRequestText }),
-            });
+            const response = await createRequest(newRequestText);
 
             if (!response.ok) {
                 throw new Error('Failed to create request');
@@ -57,9 +58,9 @@ const HomePage = () => { // Corrected component definition
 
             setNewRequestText('');
             if (newRequest && newRequest._id) {
-                navigate(`/requests/${newRequest._id}`); // Redirect to the new request page using the returned ID
+                navigate(`/requests/${newRequest._id}`);
             }
-            fetchRequests(); // Refresh the list after creating
+            fetchRequests();
         } catch (error) {
             console.error('Error creating request:', error);
         }
@@ -67,7 +68,7 @@ const HomePage = () => { // Corrected component definition
 
     useEffect(() => {
         fetchRequests();
-    }, [user.user]); // Add user.user to the dependency array
+    }, [user.user]);
 
     return (
         <>
@@ -87,7 +88,10 @@ const HomePage = () => { // Corrected component definition
                     </div>
                 ) : (
                     <div className="w-[50vw] p-10 rounded-2xl h-full shadow-2xl">
-                        <form onSubmit={handleFormSubmit} className="mb-4">
+                        <form
+                            onSubmit={handleFormSubmit}
+                            className="mb-4 flex flex-col gap-3"
+                        >
                             <input
                                 type="text"
                                 value={newRequestText}
@@ -95,14 +99,24 @@ const HomePage = () => { // Corrected component definition
                                 placeholder="Enter your request..."
                                 className="border p-2 rounded w-full"
                             />
-                            <Button type="submit" variant="contained" className="mt-2">
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                className="mt-2 w-full"
+                            >
                                 Create Request
                             </Button>
                         </form>
-                        <ul>
-                            {requests.map((request) => (
-                                // Assuming each request object has an _id and a prompt field
-                                <li key={request._id}>{request.prompt}</li>
+                        <ul className="flex flex-col gap-4">
+                            {requests.map(request => (
+                                <li
+                                    key={request._id}
+                                    className=" p-2 pl-4 list-disc"
+                                >
+                                    <Link to={`/requests/${request._id}`}>
+                                        {request.prompt}
+                                    </Link>
+                                </li>
                             ))}
                         </ul>
                     </div>

@@ -1,11 +1,10 @@
 import React, { useState, type Dispatch, type SetStateAction } from 'react';
-import type { ModalsStates } from '../types/modals';
 
 interface UserContextProps {
     children: React.ReactNode;
 }
 
-type User = { _id: string, email: string } | null;
+type User = { _id: string; email: string } | null;
 
 export const UserContext = React.createContext<{
     token: string | null;

@@ -40,12 +40,8 @@ export class OpenaiRequestsController {
             .findOne({ accessToken: token })
             .exec();
 
-        log(data);
         const { userId } = data;
-        log(userId);
-        log(prompt);
         const response = await this.openaiService.generateText(prompt);
-        log(response);
 
         const newRequest = new this.openaiRequestModel({
             userId,
