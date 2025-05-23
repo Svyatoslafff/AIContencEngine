@@ -28,6 +28,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     async loginUser(@Body() { email, password }: LoginUserDto) {
         const data = await this.authService.loginUser(email, password);
+        // Assuming the loginUser service method returns an object with _id, accessToken, and email
         return {
             status: 200,
             data,

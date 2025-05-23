@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext'; // Assuming UserContext provides the user and token
 import { getRequestsByUserId } from '../api/openai'; // Assuming this function exists
-
+import { getRequestById } from '../api/openai';
 interface Request {
     _id: string; // Use _id to match your backend schema
     prompt: string;
@@ -19,17 +19,7 @@ const RequestPage: React.FC = () => {
         const fetchRequest = async () => {
             if (!id || !user.user || !user.user.token) return;
 
-            try {
-                const token = user.user.token;
-                const response = await fetch(`/openai-requests/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch request');
-                }
+            try {const response = await getRequestById(id);
 
                 const requestData: Request = await response.json();
                 setRequest(requestData);

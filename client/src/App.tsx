@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ModalsContext } from './contexts/ModalsContext';
 import HomePage from './pages/HomePage';
 import { UserContext } from './contexts/UserContext';
+import RequestPage from './pages/RequestPage';
 import { refreshUser } from './api/auth';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <Routes>
             <Route path="/" element={<Header />}>
                 <Route index element={<HomePage />} />
+                <Route path="/requests/:id" element={<RequestPage />} />
             </Route>
         </Routes>
     );

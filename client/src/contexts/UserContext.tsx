@@ -5,7 +5,7 @@ interface UserContextProps {
     children: React.ReactNode;
 }
 
-type User = { email: string } | null;
+type User = { _id: string, email: string } | null;
 
 export const UserContext = React.createContext<{
     token: string | null;

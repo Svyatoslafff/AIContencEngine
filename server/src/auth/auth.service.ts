@@ -79,6 +79,7 @@ export class AuthService {
             return {
                 accessToken,
                 email,
+                _id: user._id,
             };
         } catch (err) {
             throw err;
