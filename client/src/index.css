@@ -3,7 +3,7 @@
 
 @layer base {
     input {
-        @apply border-1 rounded-2xl  p-2 pl-[16px] max-w-[400px] w-[40vw];
+        @apply border-1 rounded-2xl  p-2 pl-[16px]  w-[40vw];
     }
     label {
         @apply flex flex-col gap-2;

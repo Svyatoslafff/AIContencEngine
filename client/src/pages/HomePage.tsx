@@ -109,10 +109,7 @@ const HomePage = () => {
                         </form>
                         <ul className="flex flex-col gap-4">
                             {requests.map(request => (
-                                <li
-                                    key={request._id}
-                                    className=" p-2 pl-4 list-disc"
-                                >
+                                <li key={request._id} className=" p-2 pl-4">
                                     <Link to={`/requests/${request._id}`}>
                                         {request.prompt}
                                     </Link>
